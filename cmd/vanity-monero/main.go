@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"flag"
 	"os"
 	"github.com/gijsbers/go-pcre"
 	"runtime"
@@ -34,25 +35,32 @@ const (
 
 var stdin = bufio.NewScanner(os.Stdin)
 
+
 func main() {
+	var n = flag.Int("t", 0, "threads")
+	flag.Parse()
+	pattern := flag.Arg(0)
+
 	var wMode workMode
 	var partnerSpendPub, partnerViewPub *[32]byte // For split-key construct
-	var myKey, partnerKey *vanity.Key             // For split-key restore
-	fmt.Println("Select work mode:")
-	fmt.Println("1) Standard mode")
-	fmt.Println("2) Split-key mode")
-	fmt.Println("3) About")
-	switch promptNumber("Your choice:", 1, 3) {
+	var myKey, partnerKey *vanity.Key			  // For split-key restore
+	// fmt.Println("Select work mode:")
+	// fmt.Println("1) Standard mode")
+	// fmt.Println("2) Split-key mode")
+	// fmt.Println("3) About")
+	// switch promptNumber("Your choice:", 1, 3) {
+	switch 1 {
 	case 1:
 		wMode = wmStandard
 
 	case 2:
 		wMode = wmSplitKey
-		fmt.Println("Select your circumstance:")
-		fmt.Println("1) I want someone else (can be untrusted) to generate a vanity address for me")
-		fmt.Println("2) I want to help someone else to generate a vanity address")
-		fmt.Println("3) Someone just generated a vanity address for me")
-		switch promptNumber("Your choice:", 1, 3) {
+		// fmt.Println("Select your circumstance:")
+		// fmt.Println("1) I want someone else (can be untrusted) to generate a vanity address for me")
+		// fmt.Println("2) I want to help someone else to generate a vanity address")
+		// fmt.Println("3) Someone just generated a vanity address for me")
+		// switch promptNumber("Your choice:", 1, 3) {
+		switch 1 {
 		case 1:
 			seed := new([32]byte)
 			rand.Read(seed[:])
@@ -106,11 +114,12 @@ func main() {
 	fmt.Println()
 
 	var network vanity.Network
-	fmt.Println("Select network:")
-	fmt.Println("1) Monero main network")
-	fmt.Println("2) Monero test network")
-	fmt.Println("3) GRAFT main network")
-	switch promptNumber("Your choice:", 1, 3) {
+	// fmt.Println("Select network:")
+	// fmt.Println("1) Monero main network")
+	// fmt.Println("2) Monero test network")
+	// fmt.Println("3) GRAFT main network")
+	// switch promptNumber("Your choice:", 1, 3) {
+	switch 1 {
 	case 1:
 		network = vanity.MoneroMainNetwork
 	case 2:
@@ -122,20 +131,21 @@ func main() {
 
 	var dict *mnemonic.Dict
 	if partnerViewPub == nil {
-		fmt.Println("Select mnemonic seeds language:")
-		fmt.Println("1) English")
-		fmt.Println("2) Dutch")
-		fmt.Println("3) Esperanto")
-		fmt.Println("4) Spanish")
-		fmt.Println("5) French")
-		fmt.Println("6) German")
-		fmt.Println("7) Italian")
-		fmt.Println("8) Japanese")
-		fmt.Println("9) Lojban")
-		fmt.Println("10) Portuguese")
-		fmt.Println("11) Russian")
-		fmt.Println("12) Chinese (Simplified)")
-		switch promptNumber("Your choice:", 1, 12) {
+		// fmt.Println("Select mnemonic seeds language:")
+		// fmt.Println("1) English")
+		// fmt.Println("2) Dutch")
+		// fmt.Println("3) Esperanto")
+		// fmt.Println("4) Spanish")
+		// fmt.Println("5) French")
+		// fmt.Println("6) German")
+		// fmt.Println("7) Italian")
+		// fmt.Println("8) Japanese")
+		// fmt.Println("9) Lojban")
+		// fmt.Println("10) Portuguese")
+		// fmt.Println("11) Russian")
+		// fmt.Println("12) Chinese (Simplified)")
+		// switch promptNumber("Your choice:", 1, 12) {
+		switch 1 {
 		case 1:
 			dict = mnemonic.English
 		case 2:
@@ -189,15 +199,16 @@ func main() {
 
 	var mMode matchMode
 	var initIndex int
-	fmt.Println("Select match mode:")
-	fmt.Println(`1) Prefix from the 3rd character. (fast)
-   For example, pattern "Ai" matches "42Aiabc..." and "48Aiabc...".
-2) Prefix from the 1st character. (medium)
-   For example, pattern "44Ai" matches "44Aiabc..." and "44Aidef...".
-3) Regex. (slow)
-   For example, pattern ".*A[0-9]{1,3}i.+" matches "44abcA233idef...".
-   Note that in Regex mode there is no guarantee that there exists such address matching the pattern.`)
-	switch promptNumber("Your choice:", 1, 3) {
+// 	fmt.Println("Select match mode:")
+// 	fmt.Println(`1) Prefix from the 3rd character. (fast)
+//    For example, pattern "Ai" matches "42Aiabc..." and "48Aiabc...".
+// 2) Prefix from the 1st character. (medium)
+//    For example, pattern "44Ai" matches "44Aiabc..." and "44Aidef...".
+// 3) Regex. (slow)
+//    For example, pattern ".*A[0-9]{1,3}i.+" matches "44abcA233idef...".
+//    Note that in Regex mode there is no guarantee that there exists such address matching the pattern.`)
+// 	switch promptNumber("Your choice:", 1, 3) {
+	switch 3 {
 	case 1:
 		mMode = mmPrefix2
 		initIndex = 2
@@ -212,7 +223,7 @@ func main() {
 PATTERN:
 	var regex pcre.Regexp
 	var needOnlySpendKey bool
-	pattern := prompt("Enter your prefix/regex, which must be in ASCII and not include 'I', 'O', 'l':")
+	// pattern := prompt("Enter your prefix/regex, which must be in ASCII and not include 'I', 'O', 'l':")
 	switch mMode {
 	case mmPrefix:
 		if !vanity.IsValidPrefix(pattern, network, 0) {
@@ -241,17 +252,17 @@ PATTERN:
 	}
 
 	caseSensitive := true
-	if strings.ToLower(prompt("Case sensitive? [Y/n]")) == "n" {
-		caseSensitive = false
-		if mMode == mmRegex {
-			regex = pcre.MustCompile("(?i)" + pattern, 0)
-		} else {
-			pattern = strings.ToLower(pattern)
-		}
-	}
+	// if strings.ToLower(prompt("Case sensitive? [Y/n]")) == "n" {
+	// 	caseSensitive = false
+	// 	if mMode == mmRegex {
+	// 		regex = pcre.MustCompile("(?i)" + pattern, 0)
+	// 	} else {
+	// 		pattern = strings.ToLower(pattern)
+	// 	}
+	// }
 
-	n := promptNumber("Specify how many threads to run. 0 means all CPUs:", 0, 65535)
-	runtime.GOMAXPROCS(n)
+	// n := promptNumber("Specify how many threads to run. 0 means all CPUs:", 0, 65535)
+	runtime.GOMAXPROCS(*n)
 	threads := runtime.GOMAXPROCS(0)
 	fmt.Println("=========================================")
 
