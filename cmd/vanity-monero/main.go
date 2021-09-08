@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
-	"regexp"
+	"github.com/gijsbers/go-pcre"
 	"runtime"
 	"strconv"
 	"strings"
@@ -210,7 +210,7 @@ func main() {
 	fmt.Println()
 
 PATTERN:
-	var regex *regexp.Regexp
+	var regex pcre.Regexp
 	var needOnlySpendKey bool
 	pattern := prompt("Enter your prefix/regex, which must be in ASCII and not include 'I', 'O', 'l':")
 	switch mMode {
@@ -232,7 +232,7 @@ PATTERN:
 		needOnlySpendKey = vanity.NeedOnlySpendKey(pattern)
 	case mmRegex:
 		var err error
-		regex, err = regexp.Compile(pattern)
+		regex, err = pcre.Compile(pattern, 0)
 		if err != nil {
 			fmt.Println("invalid regex:", err)
 			goto PATTERN
@@ -244,7 +244,7 @@ PATTERN:
 	if strings.ToLower(prompt("Case sensitive? [Y/n]")) == "n" {
 		caseSensitive = false
 		if mMode == mmRegex {
-			regex = regexp.MustCompile("(?i)" + pattern)
+			regex = pcre.MustCompile("(?i)" + pattern, 0)
 		} else {
 			pattern = strings.ToLower(pattern)
 		}
@@ -287,7 +287,7 @@ PATTERN:
 						key = vanity.KeyFromSeed(seed)
 						addr = key.Address(network)
 
-						if regex.MatchString(addr) {
+						if regex.MatcherString(addr, 0).Matches() {
 							cancel()
 							result <- key
 							return
@@ -388,7 +388,7 @@ PATTERN:
 						key = vanity.KeyFromSeed(seed)
 						addr = key.AddressWithAdditionalPublicKey(network, partnerSpendPub, partnerViewPub)
 
-						if regex.MatchString(addr) {
+						if regex.MatcherString(addr, 0).Matches() {
 							cancel()
 							result <- key
 							return
